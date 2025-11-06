@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copier le code backend
+COPY src /app/src
+COPY models /app/models
+
+# Créer les fichiers __init__.py manquants pour que Python reconnaisse les packages
+RUN touch /app/src/__init__.py && \
+    touch /app/src/api/__init__.py && \
+    touch /app/src/api/routers/__init__.py
+
+# Installer les dépendances nécessaires (avec uvicorn)
+RUN pip install --no-cache-dir fastapi uvicorn pandas numpy joblib scikit-learn pydantic
+
+# Exposer le port 8000
+EXPOSE 8000
+
+# S'assurer que Python trouve le package src
+ENV PYTHONPATH=/app
+
+# Lancer FastAPI
+CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,0 +1,28 @@
+# ======== FRONTEND DOCKERFILE ========
+FROM python:3.11-slim
+
+# Répertoire de travail
+WORKDIR /app
+
+# Mettre à jour pip
+RUN pip install --no-cache-dir --upgrade pip
+
+# Installer explicitement Streamlit et ses dépendances (sans passer par requirements.txt)
+RUN pip install --no-cache-dir \
+    streamlit \
+    requests \
+    pandas
+
+# Copier les fichiers du frontend
+COPY src/frontend /app
+
+# Vérifier que Streamlit est installé (si l'installation échoue, le build échouera)
+RUN python -c "import streamlit; print(f'✓ Streamlit {streamlit.__version__} installé avec succès')" && \
+    python -c "import requests; print('✓ Requests installé')" && \
+    python -c "import pandas; print('✓ Pandas installé')"
+
+# Exposer le port Streamlit
+EXPOSE 8501
+
+# Commande de démarrage
+CMD ["python", "-m", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
